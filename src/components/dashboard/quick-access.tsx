@@ -8,15 +8,21 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const ACTIONS: { label: string; icon: LucideIcon; primary?: boolean }[] = [
+const ACTIONS: { label: string; icon: LucideIcon; primary?: boolean; action?: "entries" }[] = [
   { label: "Gerenciar workspaces", icon: LayoutGrid, primary: true },
   { label: "Ver workspaces ativos", icon: PlayCircle },
   { label: "Ver workspaces com falha", icon: AlertTriangle },
-  { label: "Abrir entradas de custo", icon: Receipt },
+  { label: "Entradas de custo", icon: Receipt, action: "entries" },
   { label: "Exportar dados do período", icon: Download },
 ];
 
-export function QuickAccess({ periodLabel }: { periodLabel: string }) {
+export function QuickAccess({
+  periodLabel,
+  onOpenCostEntries,
+}: {
+  periodLabel: string;
+  onOpenCostEntries: () => void;
+}) {
   return (
     <aside className="card-surface h-fit p-6">
       <h2 className="font-display text-xl font-bold">Acesso rápido</h2>
@@ -29,7 +35,11 @@ export function QuickAccess({ periodLabel }: { periodLabel: string }) {
           <button
             key={action.label}
             type="button"
-            onClick={() => toast.info(`${action.label} — ação de demonstração`)}
+            onClick={() =>
+              action.action === "entries"
+                ? onOpenCostEntries()
+                : toast.info(`${action.label} — ação de demonstração`)
+            }
             className={
               action.primary
                 ? "flex w-full items-center justify-between gap-3 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
@@ -41,6 +51,7 @@ export function QuickAccess({ periodLabel }: { periodLabel: string }) {
           </button>
         ))}
       </div>
+
     </aside>
   );
 }
