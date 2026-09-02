@@ -1,20 +1,11 @@
-import {
-  AlertTriangle,
-  Download,
-  LayoutGrid,
-  PlayCircle,
-  Receipt,
-  type LucideIcon,
-} from "lucide-react";
+import { Download, LayoutGrid, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const ACTIONS: { label: string; icon: LucideIcon; primary?: boolean; action?: "entries" }[] = [
-  { label: "Gerenciar workspaces", icon: LayoutGrid, primary: true },
-  { label: "Ver workspaces ativos", icon: PlayCircle },
-  { label: "Ver workspaces com falha", icon: AlertTriangle },
-  { label: "Entradas de custo", icon: Receipt, action: "entries" },
+  { label: "Workspaces", icon: LayoutGrid, primary: true, action: "entries" },
   { label: "Exportar dados do período", icon: Download },
 ];
+
 
 export function QuickAccess({
   periodLabel,
