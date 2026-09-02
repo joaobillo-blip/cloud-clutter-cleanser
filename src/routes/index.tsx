@@ -82,18 +82,10 @@ const GROUPINGS: { value: Grouping; label: string }[] = [
 ];
 
 
-const PAGE_SIZE = 8;
-
 function Dashboard() {
   const [grouping, setGrouping] = useState<Grouping>("month");
   const [date, setDate] = useState("2026-09-02");
   const [className, setClassName] = useState(CLASS_OPTIONS[0]!);
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<{ key: "timestamp" | "cost"; dir: "asc" | "desc" }>({
-    key: "timestamp",
-    dir: "desc",
-  });
-  const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<CostEntry | null>(null);
   const [entriesOpen, setEntriesOpen] = useState(false);
 
@@ -117,22 +109,6 @@ function Dashboard() {
 
 
 
-  const tableRows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const rows = entries.filter((e) => !q || e.workspaceName.toLowerCase().includes(q));
-    return rows.sort((a, b) => {
-      const dir = sort.dir === "asc" ? 1 : -1;
-      if (sort.key === "cost") return (a.cost - b.cost) * dir;
-      return (new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()) * dir;
-    });
-  }, [entries, search, sort]);
-
-  const pageCount = Math.max(1, Math.ceil(tableRows.length / PAGE_SIZE));
-  const safePage = Math.min(page, pageCount - 1);
-  const pageRows = tableRows.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
-
-  const toggleSort = (key: "timestamp" | "cost") =>
-    setSort((s) => ({ key, dir: s.key === key && s.dir === "desc" ? "asc" : "desc" }));
 
   const dateInputType = grouping === "day" ? "date" : grouping === "month" ? "month" : "number";
   const dateInputValue =
@@ -143,7 +119,6 @@ function Dashboard() {
     if (grouping === "day") setDate(value);
     else if (grouping === "month") setDate(`${value}-01`);
     else setDate(`${value}-01-01`);
-    setPage(0);
   };
 
   const empty = !isPending && !isError && entries.length === 0;
@@ -203,8 +178,7 @@ function Dashboard() {
                     key={g.value}
                     onClick={() => {
                       setGrouping(g.value);
-                      setPage(0);
-                    }}
+                                    }}
                     className={`flex-1 rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${
                       grouping === g.value
                         ? "bg-primary text-primary-foreground"
@@ -236,8 +210,7 @@ function Dashboard() {
                 value={className}
                 onValueChange={(v) => {
                   setClassName(v);
-                  setPage(0);
-                }}
+                            }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -390,118 +363,6 @@ function Dashboard() {
                     )}
                   </section>
 
-                  {/* Entradas de custo */}
-                  <section className="card-surface p-5">
-                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:justify-between">
-                      <div className="min-w-0">
-                        <h3 className="truncate text-lg font-bold">Entradas de custo</h3>
-                        <p className="text-xs text-muted-foreground">
-                          {tableRows.length} lançamentos em {label}
-                        </p>
-                      </div>
-                      <div className="relative w-full max-w-[220px]">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          value={search}
-                          onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(0);
-                          }}
-                          placeholder="Buscar workspace"
-                          className="pl-9"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4 overflow-x-auto">
-                      <table className="w-full min-w-[720px] text-sm">
-                        <thead>
-                          <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                            <th className="py-2 pr-3 font-semibold">Workspace</th>
-                            <th className="py-2 pr-3 font-semibold">
-                              <button
-                                className="inline-flex items-center gap-1"
-                                onClick={() => toggleSort("timestamp")}
-                              >
-                                Data/hora <ArrowUpDown className="size-3" />
-                              </button>
-                            </th>
-                            <th className="py-2 pr-3 font-semibold">Serviço</th>
-                            <th className="py-2 pr-3 text-right font-semibold">
-                              <button
-                                className="inline-flex items-center gap-1"
-                                onClick={() => toggleSort("cost")}
-                              >
-                                Custo da entrada <ArrowUpDown className="size-3" />
-                              </button>
-                            </th>
-                            <th className="py-2 text-right font-semibold">Ação</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {pageRows.map((e) => (
-                            <tr key={e.id} className="border-b border-border/60 last:border-0">
-                              <td className="py-3 pr-3">
-                                <button
-                                  onClick={() => setSelected(e)}
-                                  className="font-medium text-primary hover:underline"
-                                >
-                                  {e.workspaceName}
-                                </button>
-                                <div className="mt-1">
-                                  <StatusBadge status={e.status} />
-                                </div>
-                              </td>
-                              <td className="py-3 pr-3 text-muted-foreground">
-                                {formatDateTime(e.timestamp)}
-                              </td>
-                              <td className="py-3 pr-3">{e.service}</td>
-                              <td className="py-3 pr-3 text-right font-semibold">
-                                {formatCurrency(e.cost, e.currency)}
-                              </td>
-                              <td className="py-3 text-right">
-                                <button
-                                  onClick={() => setSelected(e)}
-                                  className="rounded-md border border-border px-3 py-1 text-xs font-semibold hover:bg-accent hover:text-accent-foreground"
-                                >
-                                  Visualizar
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                          {pageRows.length === 0 && (
-                            <tr>
-                              <td colSpan={5} className="py-10 text-center text-muted-foreground">
-                                Nenhuma entrada encontrada para a busca.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Página {safePage + 1} de {pageCount}
-                      </span>
-                      <div className="flex gap-2">
-                        <button
-                          disabled={safePage === 0}
-                          onClick={() => setPage(safePage - 1)}
-                          className="rounded-md border border-border p-1.5 disabled:opacity-40"
-                        >
-                          <ChevronLeft className="size-4" />
-                        </button>
-                        <button
-                          disabled={safePage >= pageCount - 1}
-                          onClick={() => setPage(safePage + 1)}
-                          className="rounded-md border border-border p-1.5 disabled:opacity-40"
-                        >
-                          <ChevronRight className="size-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </section>
                 </>
               )}
             </>
