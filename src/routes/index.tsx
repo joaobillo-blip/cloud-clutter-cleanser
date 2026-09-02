@@ -365,45 +365,8 @@ function Dashboard() {
                       )}
                     </div>
 
-                    <div className="card-surface p-5">
-                      <h3 className="text-lg font-bold">Distribuição por status</h3>
-                      <p className="mb-4 text-xs text-muted-foreground">
-                        Workspaces com custo registrado no período.
-                      </p>
-                      {isPending ? (
-                        <Skeleton className="h-[240px] w-full" />
-                      ) : (
-                        <ResponsiveContainer width="100%" height={240}>
-                          <PieChart>
-                            <Pie
-                              data={donut}
-                              dataKey="value"
-                              nameKey="name"
-                              innerRadius={60}
-                              outerRadius={95}
-                              paddingAngle={2}
-                            >
-                              {donut.map((d) => (
-                                <Cell key={d.status} fill={STATUS_COLORS[d.status]} />
-                              ))}
-                            </Pie>
-                            <Tooltip formatter={(v: number) => `${v} workspaces`} />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      )}
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                        {donut.map((d) => (
-                          <span key={d.status} className="flex items-center gap-1.5">
-                            <span
-                              className="size-2.5 rounded-full"
-                              style={{ backgroundColor: STATUS_COLORS[d.status] }}
-                            />
-                            {d.name} ({d.value})
-                          </span>
-                        ))}
-                      </div>
-                    </div>
                   </section>
+
 
                   <section className="card-surface p-5">
                     <h3 className="text-lg font-bold">Top custos por workspace</h3>
