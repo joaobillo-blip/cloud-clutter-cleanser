@@ -104,6 +104,8 @@ function Dashboard() {
   });
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<CostEntry | null>(null);
+  const [entriesOpen, setEntriesOpen] = useState(false);
+
 
   const filter: PeriodFilter = { grouping, date, className };
   const label = periodLabel(filter);
