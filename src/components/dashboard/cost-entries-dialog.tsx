@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StatusBadge } from "@/components/dashboard/status-badge";
+
 import {
   CLASS_OPTIONS,
   filterEntries,
@@ -156,9 +156,6 @@ export function CostEntriesDialog({ open, onOpenChange, initialFilter, onSelectE
                 <tr key={e.id} className="border-b border-border/60 last:border-0">
                   <td className="py-3 pr-3">
                     <span className="font-medium">{e.workspaceName}</span>
-                    <div className="mt-1">
-                      <StatusBadge status={e.status} />
-                    </div>
                   </td>
                   <td className="py-3 pr-3 text-muted-foreground">{formatDateTime(e.timestamp)}</td>
                   <td className="py-3 pr-3">{e.service}</td>
