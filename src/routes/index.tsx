@@ -18,11 +18,8 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Line,
   LineChart,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -41,6 +38,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { QuickAccess } from "@/components/dashboard/quick-access";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { EntryDetail } from "@/components/dashboard/entry-detail";
+import { CostEntriesDialog } from "@/components/dashboard/cost-entries-dialog";
 import {
   CLASS_OPTIONS,
   STATUS_LABEL,
@@ -83,13 +81,6 @@ const GROUPINGS: { value: Grouping; label: string }[] = [
   { value: "year", label: "Ano" },
 ];
 
-const STATUS_COLORS: Record<WorkspaceStatus, string> = {
-  running: "var(--chart-3)",
-  stopped: "var(--neutral-status)",
-  creating: "var(--chart-2)",
-  failed: "var(--destructive)",
-  removed: "var(--chart-4)",
-};
 
 const PAGE_SIZE = 8;
 
@@ -104,6 +95,8 @@ function Dashboard() {
   });
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<CostEntry | null>(null);
+  const [entriesOpen, setEntriesOpen] = useState(false);
+
 
   const filter: PeriodFilter = { grouping, date, className };
   const label = periodLabel(filter);
@@ -121,9 +114,8 @@ function Dashboard() {
   const breakdown = statusBreakdown(entries);
   const series = costSeries(entries, filter);
   const ranking = topWorkspaces(entries, 8);
-  const donut = (Object.keys(STATUS_LABEL) as WorkspaceStatus[])
-    .map((s) => ({ name: STATUS_LABEL[s], value: breakdown.counts[s], status: s }))
-    .filter((d) => d.value > 0);
+
+
 
   const tableRows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -324,7 +316,7 @@ function Dashboard() {
               ) : (
                 <>
                   {/* Gráficos */}
-                  <section className="grid gap-4 lg:grid-cols-2">
+                  <section className="grid gap-4">
                     <div className="card-surface p-5">
                       <h3 className="text-lg font-bold">Evolução de custo</h3>
                       <p className="mb-4 text-xs text-muted-foreground">
@@ -365,45 +357,8 @@ function Dashboard() {
                       )}
                     </div>
 
-                    <div className="card-surface p-5">
-                      <h3 className="text-lg font-bold">Distribuição por status</h3>
-                      <p className="mb-4 text-xs text-muted-foreground">
-                        Workspaces com custo registrado no período.
-                      </p>
-                      {isPending ? (
-                        <Skeleton className="h-[240px] w-full" />
-                      ) : (
-                        <ResponsiveContainer width="100%" height={240}>
-                          <PieChart>
-                            <Pie
-                              data={donut}
-                              dataKey="value"
-                              nameKey="name"
-                              innerRadius={60}
-                              outerRadius={95}
-                              paddingAngle={2}
-                            >
-                              {donut.map((d) => (
-                                <Cell key={d.status} fill={STATUS_COLORS[d.status]} />
-                              ))}
-                            </Pie>
-                            <Tooltip formatter={(v: number) => `${v} workspaces`} />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      )}
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                        {donut.map((d) => (
-                          <span key={d.status} className="flex items-center gap-1.5">
-                            <span
-                              className="size-2.5 rounded-full"
-                              style={{ backgroundColor: STATUS_COLORS[d.status] }}
-                            />
-                            {d.name} ({d.value})
-                          </span>
-                        ))}
-                      </div>
-                    </div>
                   </section>
+
 
                   <section className="card-surface p-5">
                     <h3 className="text-lg font-bold">Top custos por workspace</h3>
@@ -553,7 +508,7 @@ function Dashboard() {
           )}
         </main>
 
-        <QuickAccess periodLabel={label} />
+        <QuickAccess periodLabel={label} onOpenCostEntries={() => setEntriesOpen(true)} />
       </div>
 
       <footer className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
@@ -568,6 +523,14 @@ function Dashboard() {
         canSeeOriginFile
         onOpenChange={(open) => !open && setSelected(null)}
       />
+
+      <CostEntriesDialog
+        open={entriesOpen}
+        onOpenChange={setEntriesOpen}
+        initialFilter={filter}
+        onSelectEntry={setSelected}
+      />
+
     </div>
   );
 }
