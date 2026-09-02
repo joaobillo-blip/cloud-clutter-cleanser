@@ -3,15 +3,11 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
-  ArrowUpDown,
   Bell,
   Boxes,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
   CircleDollarSign,
   Menu,
-  Search,
   TriangleAlert,
 } from "lucide-react";
 import {
@@ -36,7 +32,6 @@ import {
 } from "@/components/ui/select";
 import { Toaster } from "@/components/ui/sonner";
 import { QuickAccess } from "@/components/dashboard/quick-access";
-import { StatusBadge } from "@/components/dashboard/status-badge";
 import { EntryDetail } from "@/components/dashboard/entry-detail";
 import { CostEntriesDialog } from "@/components/dashboard/cost-entries-dialog";
 import {
@@ -45,7 +40,6 @@ import {
   costSeries,
   filterEntries,
   formatCurrency,
-  formatDateTime,
   periodLabel,
   statusBreakdown,
   topWorkspaces,
