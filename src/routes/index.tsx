@@ -81,13 +81,6 @@ const GROUPINGS: { value: Grouping; label: string }[] = [
   { value: "year", label: "Ano" },
 ];
 
-const STATUS_COLORS: Record<WorkspaceStatus, string> = {
-  running: "var(--chart-3)",
-  stopped: "var(--neutral-status)",
-  creating: "var(--chart-2)",
-  failed: "var(--destructive)",
-  removed: "var(--chart-4)",
-};
 
 const PAGE_SIZE = 8;
 
