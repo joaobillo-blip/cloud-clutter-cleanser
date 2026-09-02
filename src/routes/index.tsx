@@ -123,9 +123,8 @@ function Dashboard() {
   const breakdown = statusBreakdown(entries);
   const series = costSeries(entries, filter);
   const ranking = topWorkspaces(entries, 8);
-  const donut = (Object.keys(STATUS_LABEL) as WorkspaceStatus[])
-    .map((s) => ({ name: STATUS_LABEL[s], value: breakdown.counts[s], status: s }))
-    .filter((d) => d.value > 0);
+
+
 
   const tableRows = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -533,6 +532,14 @@ function Dashboard() {
         canSeeOriginFile
         onOpenChange={(open) => !open && setSelected(null)}
       />
+
+      <CostEntriesDialog
+        open={entriesOpen}
+        onOpenChange={setEntriesOpen}
+        initialFilter={filter}
+        onSelectEntry={setSelected}
+      />
+
     </div>
   );
 }
