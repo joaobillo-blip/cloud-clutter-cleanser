@@ -324,7 +324,7 @@ function Dashboard() {
               ) : (
                 <>
                   {/* Gráficos */}
-                  <section className="grid gap-4 lg:grid-cols-2">
+                  <section className="grid gap-4">
                     <div className="card-surface p-5">
                       <h3 className="text-lg font-bold">Evolução de custo</h3>
                       <p className="mb-4 text-xs text-muted-foreground">
@@ -516,7 +516,7 @@ function Dashboard() {
           )}
         </main>
 
-        <QuickAccess periodLabel={label} />
+        <QuickAccess periodLabel={label} onOpenCostEntries={() => setEntriesOpen(true)} />
       </div>
 
       <footer className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
