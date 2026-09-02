@@ -18,11 +18,8 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   Line,
   LineChart,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -41,6 +38,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { QuickAccess } from "@/components/dashboard/quick-access";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { EntryDetail } from "@/components/dashboard/entry-detail";
+import { CostEntriesDialog } from "@/components/dashboard/cost-entries-dialog";
 import {
   CLASS_OPTIONS,
   STATUS_LABEL,
