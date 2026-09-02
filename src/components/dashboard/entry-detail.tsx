@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { StatusBadge } from "./status-badge";
+
 import {
   costSeries,
   formatCurrency,
@@ -71,7 +71,6 @@ export function EntryDetail({
             <SheetHeader className="space-y-2">
               <SheetTitle className="font-display text-2xl">{entry.workspaceName}</SheetTitle>
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <StatusBadge status={entry.status} />
                 <span>ID: {entry.workspaceId}</span>
                 <span>•</span>
                 <span>{entry.className}</span>
