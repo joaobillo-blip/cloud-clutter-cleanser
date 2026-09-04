@@ -36,17 +36,15 @@ import { EntryDetail } from "@/components/dashboard/entry-detail";
 import { CostEntriesDialog } from "@/components/dashboard/cost-entries-dialog";
 import {
   CLASS_OPTIONS,
-  STATUS_LABEL,
   costSeries,
   filterEntries,
   formatCurrency,
   periodLabel,
-  statusBreakdown,
-  topWorkspaces,
+  uniqueWorkspaceCount,
+  weeklyVariation,
   type CostEntry,
   type Grouping,
   type PeriodFilter,
-  type WorkspaceStatus,
 } from "@/lib/workspace-data";
 
 export const Route = createFileRoute("/")({
@@ -97,9 +95,9 @@ function Dashboard() {
 
   const entries = useMemo(() => data ?? [], [data]);
   const totalCost = entries.reduce((s, e) => s + e.cost, 0);
-  const breakdown = statusBreakdown(entries);
+  const totalWorkspaces = uniqueWorkspaceCount(entries);
   const series = costSeries(entries, filter);
-  const ranking = topWorkspaces(entries, 8);
+  const weekly = weeklyVariation(entries, filter);
 
 
 
