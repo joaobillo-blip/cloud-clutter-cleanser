@@ -321,30 +321,36 @@ function Dashboard() {
 
 
                   <section className="card-surface p-5">
-                    <h3 className="text-lg font-bold">Top custos por workspace</h3>
+                    <h3 className="text-lg font-bold">Variação semanal de custos</h3>
                     <p className="mb-4 text-xs text-muted-foreground">
-                      Oito maiores custos do período, do maior para o menor.
+                      Custo total por semana do período, com variação em relação à semana anterior.
                     </p>
                     {isPending ? (
                       <Skeleton className="h-[300px] w-full" />
                     ) : (
                       <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={ranking} layout="vertical" margin={{ left: 40 }}>
+                        <BarChart data={weekly}>
                           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                          <XAxis type="number" tick={{ fontSize: 11 }} />
-                          <YAxis
-                            type="category"
-                            dataKey="name"
-                            width={140}
-                            tick={{ fontSize: 11 }}
-                          />
+                          <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 11 }} />
                           <Tooltip
-                            formatter={(v: number, _n, item) => [
-                              `${formatCurrency(v)} · ${(item.payload as { hours: number }).hours} h de uso`,
-                              "Custo no período",
-                            ]}
+                            formatter={(v: number, n, item) => {
+                              if (n === "cost") {
+                                const variation = (item.payload as { variation: number | null })
+                                  .variation;
+                                return [
+                                  `${formatCurrency(v)}${
+                                    variation === null
+                                      ? ""
+                                      : ` · ${variation > 0 ? "+" : ""}${variation}% vs semana anterior`
+                                  }`,
+                                  "Custo da semana",
+                                ];
+                              }
+                              return [v, n];
+                            }}
                           />
-                          <Bar dataKey="cost" fill="var(--chart-1)" radius={[0, 4, 4, 0]} />
+                          <Bar dataKey="cost" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
