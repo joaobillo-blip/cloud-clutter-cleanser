@@ -50,6 +50,15 @@ export function EntryDetail({
 }: Props) {
   const wsEntries = entry ? entries.filter((e) => e.workspaceId === entry.workspaceId) : [];
   const series = entry ? costSeries(wsEntries, filter) : [];
+  let hourAcc = 0;
+  const hourlySeries = series.map((point, i) => {
+    hourAcc += point.hours;
+    return {
+      bucket: point.bucket,
+      costPerHour: point.hours > 0 ? Math.round((point.cost / point.hours) * 100) / 100 : 0,
+      avgHours: Math.round((hourAcc / (i + 1)) * 10) / 10,
+    };
+  });
   const machines = [...new Set(wsEntries.map((e) => e.machine))];
   const machineSeries = series.map((point, i) => {
     const row: Record<string, string | number> = { bucket: point.bucket };
