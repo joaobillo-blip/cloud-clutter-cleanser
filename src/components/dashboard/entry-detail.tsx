@@ -50,6 +50,15 @@ export function EntryDetail({
 }: Props) {
   const wsEntries = entry ? entries.filter((e) => e.workspaceId === entry.workspaceId) : [];
   const series = entry ? costSeries(wsEntries, filter) : [];
+  let hourAcc = 0;
+  const hourlySeries = series.map((point, i) => {
+    hourAcc += point.hours;
+    return {
+      bucket: point.bucket,
+      costPerHour: point.hours > 0 ? Math.round((point.cost / point.hours) * 100) / 100 : 0,
+      avgHours: Math.round((hourAcc / (i + 1)) * 10) / 10,
+    };
+  });
   const machines = [...new Set(wsEntries.map((e) => e.machine))];
   const machineSeries = series.map((point, i) => {
     const row: Record<string, string | number> = { bucket: point.bucket };
@@ -102,35 +111,38 @@ export function EntryDetail({
 
             <div className="space-y-4 px-4 pb-8">
               <div className="card-surface p-4">
-                <h3 className="text-base font-semibold">Custo × horas de uso</h3>
+                <h3 className="text-base font-semibold">Custo por Hora vs. Utilização Média</h3>
                 <p className="mb-3 text-xs text-muted-foreground">
-                  Comparação entre tempo de utilização e custo gerado no período.
+                  Custo médio por hora de uso (barras) comparado à utilização média acumulada no
+                  período (linha).
                 </p>
                 {hasData ? (
                   <ResponsiveContainer width="100%" height={220}>
-                    <ComposedChart data={series}>
+                    <ComposedChart data={hourlySeries}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
                       <YAxis yAxisId="h" tick={{ fontSize: 11 }} />
                       <YAxis yAxisId="c" orientation="right" tick={{ fontSize: 11 }} />
                       <Tooltip
                         formatter={(v: number, name) =>
-                          name === "Custo (USD)" ? formatCurrency(v) : `${v} h`
+                          name === "Custo por hora"
+                            ? `${formatCurrency(v)}/h`
+                            : `${v.toFixed(1)} h (média)`
                         }
                       />
                       <Legend wrapperStyle={{ fontSize: 12 }} />
                       <Bar
-                        yAxisId="h"
-                        dataKey="hours"
-                        name="Horas de uso"
+                        yAxisId="c"
+                        dataKey="costPerHour"
+                        name="Custo por hora"
                         fill="var(--chart-2)"
                         radius={[4, 4, 0, 0]}
                       />
                       <Line
-                        yAxisId="c"
+                        yAxisId="h"
                         type="monotone"
-                        dataKey="cost"
-                        name="Custo (USD)"
+                        dataKey="avgHours"
+                        name="Utilização média"
                         stroke="var(--chart-1)"
                         strokeWidth={2}
                         dot={false}
