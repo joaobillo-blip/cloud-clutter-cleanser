@@ -18,13 +18,6 @@ export interface CostEntry {
   machine: string;
 }
 
-export const STATUS_LABEL: Record<WorkspaceStatus, string> = {
-  running: "Em execução",
-  stopped: "Parados",
-  creating: "Em criação",
-  failed: "Com falha",
-  removed: "Removidos",
-};
 
 const SERVICES = [
   ["Compute Engine", "vCPU/hora"],
@@ -179,32 +172,34 @@ export function costSeries(entries: CostEntry[], filter: PeriodFilter) {
   });
 }
 
-export function topWorkspaces(entries: CostEntry[], limit = 8) {
-  const map = new Map<string, { name: string; cost: number; hours: number }>();
-  for (const e of entries) {
-    const cur = map.get(e.workspaceId) ?? { name: e.workspaceName, cost: 0, hours: 0 };
-    cur.cost += e.cost;
-    cur.hours += e.usageHours;
-    map.set(e.workspaceId, cur);
-  }
-  return [...map.values()]
-    .map((v) => ({ ...v, cost: Math.round(v.cost * 100) / 100, hours: Math.round(v.hours * 10) / 10 }))
-    .sort((a, b) => b.cost - a.cost)
-    .slice(0, limit);
+export function uniqueWorkspaceCount(entries: CostEntry[]) {
+  return new Set(entries.map((e) => e.workspaceId)).size;
 }
 
-export function statusBreakdown(entries: CostEntry[]) {
-  const seen = new Map<string, WorkspaceStatus>();
-  for (const e of entries) seen.set(e.workspaceId, e.status);
-  const counts: Record<WorkspaceStatus, number> = {
-    running: 0,
-    stopped: 0,
-    creating: 0,
-    failed: 0,
-    removed: 0,
-  };
-  for (const s of seen.values()) counts[s] += 1;
-  return { counts, total: seen.size };
+const WEEK_MS = 7 * 24 * 3600 * 1000;
+
+/** Custo por semana do período, com variação percentual em relação à semana anterior. */
+export function weeklyVariation(entries: CostEntry[], filter: PeriodFilter) {
+  const { from, to } = periodRange(filter);
+  const weeks: { label: string; cost: number; variation: number | null }[] = [];
+  for (let t = from.getTime(); t < to.getTime(); t += WEEK_MS) {
+    let cost = 0;
+    for (const e of entries) {
+      const x = new Date(e.timestamp).getTime();
+      if (x >= t && x < t + WEEK_MS) cost += e.cost;
+    }
+    cost = Math.round(cost * 100) / 100;
+    const prev = weeks.length ? weeks[weeks.length - 1]!.cost : null;
+    const variation =
+      prev !== null && prev > 0 ? Math.round(((cost - prev) / prev) * 1000) / 10 : null;
+    const d = new Date(t);
+    weeks.push({
+      label: `Sem. ${String(d.getUTCDate()).padStart(2, "0")}/${String(d.getUTCMonth() + 1).padStart(2, "0")}`,
+      cost,
+      variation,
+    });
+  }
+  return weeks;
 }
 
 export function formatCurrency(value: number, currency = "USD") {

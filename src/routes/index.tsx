@@ -36,17 +36,15 @@ import { EntryDetail } from "@/components/dashboard/entry-detail";
 import { CostEntriesDialog } from "@/components/dashboard/cost-entries-dialog";
 import {
   CLASS_OPTIONS,
-  STATUS_LABEL,
   costSeries,
   filterEntries,
   formatCurrency,
   periodLabel,
-  statusBreakdown,
-  topWorkspaces,
+  uniqueWorkspaceCount,
+  weeklyVariation,
   type CostEntry,
   type Grouping,
   type PeriodFilter,
-  type WorkspaceStatus,
 } from "@/lib/workspace-data";
 
 export const Route = createFileRoute("/")({
@@ -97,9 +95,9 @@ function Dashboard() {
 
   const entries = useMemo(() => data ?? [], [data]);
   const totalCost = entries.reduce((s, e) => s + e.cost, 0);
-  const breakdown = statusBreakdown(entries);
+  const totalWorkspaces = uniqueWorkspaceCount(entries);
   const series = costSeries(entries, filter);
-  const ranking = topWorkspaces(entries, 8);
+  const weekly = weeklyVariation(entries, filter);
 
 
 
@@ -243,16 +241,11 @@ function Dashboard() {
                   {isPending ? (
                     <Skeleton className="mt-3 h-12 w-24" />
                   ) : (
-                    <p className="mt-2 font-display text-5xl font-extrabold">{breakdown.total}</p>
+                    <p className="mt-2 font-display text-5xl font-extrabold">{totalWorkspaces}</p>
                   )}
-                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs sm:grid-cols-3">
-                    {(Object.keys(STATUS_LABEL) as WorkspaceStatus[]).map((s) => (
-                      <div key={s}>
-                        <p className="text-muted-foreground">{STATUS_LABEL[s]}</p>
-                        <p className="font-semibold">{breakdown.counts[s]}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
+                    Workspaces com lançamentos de custo no período selecionado.
+                  </p>
                 </div>
                 <div className="card-surface p-5">
                   <div className="flex items-center gap-2 text-primary">
@@ -328,30 +321,36 @@ function Dashboard() {
 
 
                   <section className="card-surface p-5">
-                    <h3 className="text-lg font-bold">Top custos por workspace</h3>
+                    <h3 className="text-lg font-bold">Variação semanal de custos</h3>
                     <p className="mb-4 text-xs text-muted-foreground">
-                      Oito maiores custos do período, do maior para o menor.
+                      Custo total por semana do período, com variação em relação à semana anterior.
                     </p>
                     {isPending ? (
                       <Skeleton className="h-[300px] w-full" />
                     ) : (
                       <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={ranking} layout="vertical" margin={{ left: 40 }}>
+                        <BarChart data={weekly}>
                           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                          <XAxis type="number" tick={{ fontSize: 11 }} />
-                          <YAxis
-                            type="category"
-                            dataKey="name"
-                            width={140}
-                            tick={{ fontSize: 11 }}
-                          />
+                          <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 11 }} />
                           <Tooltip
-                            formatter={(v: number, _n, item) => [
-                              `${formatCurrency(v)} · ${(item.payload as { hours: number }).hours} h de uso`,
-                              "Custo no período",
-                            ]}
+                            formatter={(v: number, n, item) => {
+                              if (n === "cost") {
+                                const variation = (item.payload as { variation: number | null })
+                                  .variation;
+                                return [
+                                  `${formatCurrency(v)}${
+                                    variation === null
+                                      ? ""
+                                      : ` · ${variation > 0 ? "+" : ""}${variation}% vs semana anterior`
+                                  }`,
+                                  "Custo da semana",
+                                ];
+                              }
+                              return [v, n];
+                            }}
                           />
-                          <Bar dataKey="cost" fill="var(--chart-1)" radius={[0, 4, 4, 0]} />
+                          <Bar dataKey="cost" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     )}
