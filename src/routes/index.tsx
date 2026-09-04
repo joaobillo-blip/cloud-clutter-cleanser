@@ -241,16 +241,11 @@ function Dashboard() {
                   {isPending ? (
                     <Skeleton className="mt-3 h-12 w-24" />
                   ) : (
-                    <p className="mt-2 font-display text-5xl font-extrabold">{breakdown.total}</p>
+                    <p className="mt-2 font-display text-5xl font-extrabold">{totalWorkspaces}</p>
                   )}
-                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs sm:grid-cols-3">
-                    {(Object.keys(STATUS_LABEL) as WorkspaceStatus[]).map((s) => (
-                      <div key={s}>
-                        <p className="text-muted-foreground">{STATUS_LABEL[s]}</p>
-                        <p className="font-semibold">{breakdown.counts[s]}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
+                    Workspaces com lançamentos de custo no período selecionado.
+                  </p>
                 </div>
                 <div className="card-surface p-5">
                   <div className="flex items-center gap-2 text-primary">
